@@ -1,0 +1,18 @@
+fluentd:
+  scale: 1
+  metadata:
+    fluentd:
+      plugins:
+        - gelf
+        - fluent-plugin-concat
+fluentd-conf:
+  scale: 1
+fluentd-serve:
+  scale: 1
+  health_check:
+    port: 3000
+    interval: 5000
+    unhealthy_threshold: 3
+    request_line: ''
+    healthy_threshold: 2
+    response_timeout: 5000

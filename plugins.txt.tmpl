@@ -1,0 +1,10 @@
+{{ range services -}}
+{{ $fluentd := .Metadata.GetValue "fluentd" -}}
+{{ if $fluentd -}}
+{{ if $fluentd.plugins -}}
+{{ range $grafana.plugins -}}
+{{ . }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}

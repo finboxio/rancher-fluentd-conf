@@ -1,0 +1,29 @@
+fluentd:
+  tty: true
+  stdin_open: true
+  image: finboxio/fluentd:v0.14.4
+  volumes_from:
+    - fluentd-conf
+  labels:
+    io.rancher.sidekicks: fluentd-conf,fluentd-serve
+
+fluentd-conf:
+  image: finboxio/rancher-fluentd-conf:dev
+  tty: true
+  pid: host
+  privileged: true
+  labels:
+    io.rancher.container.pull_image: always
+  volumes:
+    - /etc/rancher-conf
+    - /opt/rancher/bin
+
+fluentd-serve:
+  image: finboxio/serve
+  tty: true
+  command: /etc/rancher-conf
+  labels:
+    lb.haproxy.3000.frontend: 80/http
+    lb.haproxy.3000.domains: http://fl.rancher
+  volumes_from:
+    - fluentd-conf

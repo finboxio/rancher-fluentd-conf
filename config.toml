@@ -1,0 +1,22 @@
+metadata-version = "2015-12-19"
+log-level = "debug"
+interval = 10
+onetime = false
+
+[[ template ]]
+source = "/etc/rancher-conf/reload.sh.tmpl"
+dest = "/etc/rancher-conf/reload.sh"
+notify-cmd = "sh /etc/rancher-conf/reload.sh"
+notify-output = true
+
+[[ template ]]
+source = "/etc/rancher-conf/plugins.txt.tmpl"
+dest = "/etc/rancher-conf/plugins.txt"
+notify-cmd = "/etc/rancher-conf/reload.sh"
+notify-out = true
+
+[[ template ]]
+source = "/etc/rancher-conf/fluent.conf.tmpl"
+dest = "/etc/rancher-conf/fluent.conf"
+notify-cmd = "/etc/rancher-conf/reload.sh"
+notify-out = true
