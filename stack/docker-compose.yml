@@ -2,19 +2,26 @@ fluentd:
   tty: true
   stdin_open: true
   image: finboxio/fluentd:v0.14.4
+  entrypoint: /opt/rancher/bin/run.sh
   volumes_from:
     - fluentd-conf
   labels:
+    io.rancher.scheduler.global: 'true'
+    io.rancher.container.pull_image: always
     io.rancher.sidekicks: fluentd-conf,fluentd-serve
 
 fluentd-conf:
   image: finboxio/rancher-fluentd-conf:dev
   tty: true
+  stdin_open: true
   pid: host
   privileged: true
   labels:
     io.rancher.container.pull_image: always
   volumes:
+    - /fluentd-gems:/home/fluent/.gem
+    - /var/lib/docker/containers:/var/lib/docker/containers
+    - /var/run/docker.sock:/var/run/docker.sock
     - /etc/rancher-conf
     - /opt/rancher/bin
 
@@ -23,7 +30,7 @@ fluentd-serve:
   tty: true
   command: /etc/rancher-conf
   labels:
-    lb.haproxy.3000.frontend: 80/http
-    lb.haproxy.3000.domains: http://fl.rancher
+    rancher.haproxy.3000.frontend: 80/http
+    rancher.haproxy.3000.domains: http://fs.rancher
   volumes_from:
     - fluentd-conf

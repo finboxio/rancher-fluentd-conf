@@ -1,10 +1,5 @@
 fluentd:
   scale: 1
-  metadata:
-    fluentd:
-      plugins:
-        - gelf
-        - fluent-plugin-concat
 fluentd-conf:
   scale: 1
 fluentd-serve:

@@ -6,8 +6,8 @@ module Fluent
     Plugin.register_filter('expat', self)
 
     config_param :log_key, :string, :default => 'log'
-    config_param :pattern_key, :string, :default => 'log.pattern'
-    config_param :exlude_key, :string, :default => 'log.ignore'
+    config_param :pattern_key, :string, :default => 'fluentd.pattern'
+    config_param :exlude_key, :string, :default => 'fluentd.ignore'
 
     def initialize
       super

@@ -7,6 +7,7 @@ module Fluent
 
     config_param :container_id, :string
     config_param :docker_containers_path, :string, :default => '/var/lib/docker/containers'
+    config_param :targets_label, :string, :default => 'io.rancher.stack_service.name'
 
     def initialize
       super
@@ -27,7 +28,6 @@ module Fluent
     end
 
     def filter(tag, time, record)
-      # This method implements the filtering logic for individual filters
       id = interpolate(tag, @container_id)
       config = get_cfg(id)
 
@@ -39,7 +39,14 @@ module Fluent
           record[k] = v.to_s
         end
       end
-      record
+
+      if record['fluentd.targets'].nil?
+        record['fluentd.targets'] = record[@targets_label]
+      end
+
+      if ! record['fluentd.pattern'].nil?
+        record
+      end
     end
 
     private
@@ -56,10 +63,7 @@ module Fluent
 
     def get_cfg(id)
       begin
-        config_path = "#{@docker_containers_path}/#{id}/config.json"
-        if not File.exists?(config_path)
-          config_path = "#{@docker_containers_path}/#{id}/config.v2.json"
-        end
+        config_path = "#{@docker_containers_path}/#{id}/config.v2.json"
         docker_cfg = JSON.parse(File.read(config_path))
         docker_cfg['Name'] = docker_cfg['Name'][1..-1]
       rescue => exception
