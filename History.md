@@ -1,4 +1,9 @@
 
+0.0.1 / 2016-09-19
+==================
+
+  * service-configurable plugins stores, and pipelines
+
 0.0.0 / 2016-09-10
 ==================
 
