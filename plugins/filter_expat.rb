@@ -32,7 +32,7 @@ module Fluent
         if record[@pattern_key] then
           begin
             pattern = Regexp.new record[@pattern_key]
-            parse_pattern(pattern, log, record)
+            parse_pattern(pattern, uncolorize(log), record)
           rescue => exception
             puts exception
           end
@@ -85,6 +85,10 @@ module Fluent
           ret[key] = v
         end
       end
+    end
+
+    def uncolorize(string)
+      string.gsub(/\033\[\d{1,2}(;\d{1,2}){0,2}[mGK]/, '')
     end
   end
 end
