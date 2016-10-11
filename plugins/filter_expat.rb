@@ -54,6 +54,8 @@ module Fluent
             if name.end_with? '.json' then
               entries = parse_json(name[0..-6], match[name])
               record.merge! entries
+            elsif name.end_with? '.num' then
+              record[name[0..-5]] = match[name].to_f
             else
               record[name] = match[name]
             end
