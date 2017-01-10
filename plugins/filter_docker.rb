@@ -31,6 +31,7 @@ module Fluent
       id = interpolate(tag, @container_id)
       config = get_cfg(id)
 
+      record['log'] = sanitize(record['log'])
       record['container_id'] = id
       record['container_name'] = config['Name'] || '<unknown>'
 
@@ -59,6 +60,10 @@ module Fluent
     def get_name(id)
       @id_to_cfg[id] = get_cfg(id) unless @id_to_cfg.has_key? id
       @id_to_cfg[id]['Name']
+    end
+
+    def sanitize(string)
+      string.encode('utf-8', :invalid => :replace, :undef => :replace, :replace => '-')
     end
 
     def get_cfg(id)
