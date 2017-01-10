@@ -1,4 +1,11 @@
 
+0.0.4 / 2017-01-10
+==================
+
+  * sanitize non-utf8 characters from docker logs prior to processing
+  * try to fix parsing of strings with extended ascii characters
+  * switch to released rancher-aws-conf
+
 0.0.3 / 2016-10-10
 ==================
 
