@@ -8,6 +8,7 @@ module Fluent
     config_param :log_key, :string, :default => 'log'
     config_param :pattern_key, :string, :default => 'fluentd.pattern'
     config_param :exlude_key, :string, :default => 'fluentd.ignore'
+    config_param :time_key, :string, :default => 'fluentd.timestamp'
 
     def initialize
       super
@@ -38,6 +39,15 @@ module Fluent
           end
         end
       end
+
+      unless record[@time_key].nil?
+        begin
+          record['actual_unix_timestamp'] = DateTime.parse(record[record[@time_key]]).to_time.utc.to_i
+        rescue => exception
+          puts exception
+        end
+      end
+
       unless !record[@exlude_key].nil?
         record
       end

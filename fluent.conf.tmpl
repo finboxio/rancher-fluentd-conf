@@ -84,6 +84,12 @@
   <filter docker.*>
     @type expat
   </filter>
+
+  <filter docker.*>
+    @type record_transformer
+    renew_time_key actual_unix_timestamp
+  </filter>
+
   # Fan out to specified target labels
   <match docker.*>
     @type fanout
