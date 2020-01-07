@@ -90,6 +90,10 @@
     renew_time_key actual_unix_timestamp
   </filter>
 
+  <filter docker.*>
+    @type kibana
+  </filter>
+
   # Fan out to specified target labels
   <match docker.*>
     @type fanout

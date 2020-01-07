@@ -32,12 +32,12 @@ module Fluent
       config = get_cfg(id)
 
       record['log'] = sanitize(record['log'])
-      record['container_id'] = id
-      record['container_name'] = config['Name'] || '<unknown>'
+      record['docker.container.id'] = id
+      record['docker.container.name'] = config['Name'] || '<unknown>'
 
       unless config['Config']['Labels'].nil?
         config['Config']['Labels'].each_pair do |k,v|
-          record[k] = v.to_s
+          record['docker.container.labels.' + k] = v.to_s
         end
       end
 
