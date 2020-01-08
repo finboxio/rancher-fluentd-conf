@@ -92,6 +92,7 @@
 
   <filter docker.*>
     @type kibana
+    hostname {{ host.Name }}
   </filter>
 
   # Fan out to specified target labels

@@ -4,6 +4,8 @@ module Fluent
   class ExpatFilter < Filter
     Plugin.register_filter('kibana', self)
 
+    config_param :hostname, :string, default: '<unknown>'
+
     def initialize
       super
     end
@@ -22,6 +24,7 @@ module Fluent
 
     def filter(tag, time, record)
       record['@timestamp'] = Time.at(time.to_r).utc.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
+      record['host.name'] = @hostname
       record
     end
   end
