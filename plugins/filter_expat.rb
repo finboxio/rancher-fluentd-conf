@@ -6,9 +6,9 @@ module Fluent
     Plugin.register_filter('expat', self)
 
     config_param :log_key, :string, :default => 'log'
-    config_param :pattern_key, :string, :default => 'fluentd.pattern'
-    config_param :exlude_key, :string, :default => 'fluentd.ignore'
-    config_param :time_key, :string, :default => 'fluentd.timestamp'
+    config_param :pattern_key, :string, :default => 'docker.container.labels.fluentd.pattern'
+    config_param :exlude_key, :string, :default => 'docker.container.labels.fluentd.ignore'
+    config_param :time_key, :string, :default => 'docker.container.labels.fluentd.timestamp'
 
     def initialize
       super

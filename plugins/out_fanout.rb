@@ -28,7 +28,7 @@ module Fluent
         labels = []
 
         # skip global if private
-        next if record['fluentd.private']
+        next if record['docker.container.labels.fluentd.private']
         labels.push('GLOBAL')
 
         # handle arrays, csv or space-separated strings

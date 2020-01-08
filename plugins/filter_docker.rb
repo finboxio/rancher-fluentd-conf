@@ -7,7 +7,7 @@ module Fluent
 
     config_param :container_id, :string
     config_param :docker_containers_path, :string, :default => '/var/lib/docker/containers'
-    config_param :targets_label, :string, :default => 'io.rancher.stack_service.name'
+    config_param :targets_label, :string, :default => 'docker.container.labels.io.rancher.stack_service.name'
 
     def initialize
       super
@@ -41,11 +41,11 @@ module Fluent
         end
       end
 
-      if record['fluentd.targets'].nil?
-        record['fluentd.targets'] = record[@targets_label]
+      if record['docker.container.labels.fluentd.targets'].nil?
+        record['docker.container.labels.fluentd.targets'] = record[@targets_label]
       end
 
-      if ! record['fluentd.pattern'].nil?
+      if ! record['docker.container.labels.fluentd.pattern'].nil?
         record
       end
     end

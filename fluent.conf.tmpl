@@ -98,7 +98,7 @@
   # Fan out to specified target labels
   <match docker.*>
     @type fanout
-    targets_key fluentd.targets
+    targets_key docker.container.labels.fluentd.targets
   </match>
 </label>
 

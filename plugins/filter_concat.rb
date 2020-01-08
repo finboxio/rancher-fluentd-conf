@@ -4,20 +4,28 @@ module Fluent
 
     desc "The key for part of multiline log"
     config_param :key, :string, required: true
+
     desc "The separator of lines"
     config_param :separator, :string, default: "\n"
+
     desc "The number of lines"
     config_param :n_lines, :integer, default: nil
+
     desc "The regexp to match beginning of multiline"
     config_param :multiline_start_regexp, :string, default: nil
+
     desc "The regexp to match ending of multiline"
     config_param :multiline_end_regexp, :string, default: nil
+
     desc "The key to determine which stream an event belongs to"
     config_param :stream_identity_key, :string, default: nil
+
     desc "The interval between data flushes, 0 means disable timeout"
     config_param :flush_interval, :time, default: 60
+
     desc "The label name to handle timeout"
     config_param :timeout_label, :string, default: nil
+
     desc "Use timestamp of first record when buffer is flushed"
     config_param :use_first_timestamp, :bool, default: false
 
