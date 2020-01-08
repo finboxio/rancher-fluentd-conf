@@ -44,13 +44,13 @@
 <filter docker.var.lib.docker.containers.**>
   @type docker
   container_id "${tag_parts[5]}"
-  targets_label "io.rancher.stack_service.name"
+  targets_label "docker.container.labels.io.rancher.stack_service.name"
 </filter>
 
 # Rewrite tag to docker.<container_name> for readability
 <match docker.var.lib.docker.containers.**>
   @type rewrite_tag
-  rewriterule1 container_name (.+) docker.$1
+  rewriterule1 docker.container.name (.+) docker.$1
 </match>
 
 # Concat multiline messages
@@ -65,7 +65,7 @@
   @log_level warn
   key log
   use_first_timestamp true
-  stream_identity_key container_id
+  stream_identity_key docker.container.id
   multiline_start_regexp /^\S+/
   timeout_label @DEFAULT
   separator ""
