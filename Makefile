@@ -21,9 +21,9 @@ DOCKER_IMAGE := $(shell if [[ "$(DOCKER_REGISTRY)" ]]; then echo $(DOCKER_REGIST
 DOCKER_VERSION := $(shell echo "$(DOCKER_IMAGE):$(BUILD_VERSION)")
 DOCKER_LATEST := $(shell if [[ "$(VERSION_DIRTY)" -gt "0" ]] || [[ "$(GIT_DIRTY)" == "yes" ]]; then echo "$(DOCKER_IMAGE):dev"; else echo $(DOCKER_IMAGE):latest; fi)
 
-RANCHER_URL := $(shell renv local | grep RANCHER_URL | cut -d= -f2)
-RANCHER_ACCESS_KEY := $(shell renv local | grep RANCHER_ACCESS_KEY | cut -d= -f2)
-RANCHER_SECRET_KEY := $(shell renv local | grep RANCHER_SECRET_KEY | cut -d= -f2)
+# RANCHER_URL := $(shell renv local | grep RANCHER_URL | cut -d= -f2)
+# RANCHER_ACCESS_KEY := $(shell renv local | grep RANCHER_ACCESS_KEY | cut -d= -f2)
+# RANCHER_SECRET_KEY := $(shell renv local | grep RANCHER_SECRET_KEY | cut -d= -f2)
 
 info:
 	@echo "git branch:      $(GIT_BRANCH)"

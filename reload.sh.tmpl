@@ -1,13 +1,12 @@
 #!/bin/sh
 
-chmod +r /etc/rancher-conf/fluent.conf
-chmod +r /etc/rancher-conf/plugins.txt
+echo 'reloading...'
 
 {{ with self.Parent -}}
 container=$(docker ps -q | \
   xargs docker inspect \
   | jq -r '.[] | select(.Config.Labels["io.rancher.container.uuid"] == "{{ .Labels.GetValue "io.rancher.container.uuid" }}") | .Id')
 
-docker exec --user fluent $container sh /opt/rancher/bin/update-plugins.sh
+docker exec $container sh /opt/rancher/bin/update-plugins.sh
 docker kill -s HUP $container
 {{ end -}}

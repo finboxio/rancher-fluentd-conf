@@ -1,4 +1,4 @@
-FROM finboxio/rancher-conf-aws
+FROM finboxio/rancher-conf-aws:v0.4.2
 
 RUN apk add --no-cache docker
 
@@ -9,5 +9,4 @@ COPY reload.sh.tmpl /etc/rancher-conf/
 COPY plugins /etc/rancher-conf/plugins
 
 COPY run.sh /opt/rancher/bin/
-COPY start-fluent.sh /opt/rancher/bin/
 COPY update-plugins.sh /opt/rancher/bin/

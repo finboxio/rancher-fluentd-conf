@@ -7,7 +7,7 @@ onetime = false
 source = "/etc/rancher-conf/reload.sh.tmpl"
 dest = "/etc/rancher-conf/reload.sh"
 notify-cmd = "sh /etc/rancher-conf/reload.sh"
-notify-output = true
+notify-out = true
 
 [[ template ]]
 source = "/etc/rancher-conf/plugins.txt.tmpl"

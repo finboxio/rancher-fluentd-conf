@@ -7,25 +7,39 @@
 #  => this can be overridden on a per-message basis by using an expression pattern that overrides fluentd.targets
 #  => any stack/service in rancher is an available target (though they might not do anything with the messages)
 
-{{ define "store" }}
-{{ if isJSONArray . }}
+{{- define "store" }}
+{{- if isJSONArray . }}
 {{ range . }}
-<store>
-{{ range $key, $value := . }}
-{{ if eq $key "type" }}@type {{ $value }}
-{{ else }}{{ $key }} {{ $value }}{{ end }}
-{{ end }}
-</store>
-{{ end }}
-{{ else if isJSONObject . }}
-<store>
-{{ range $key, $value := . }}
-{{ if eq $key "type" }}@type {{ $value }}
-{{ else }}{{ $key }} {{ $value }}{{ end }}
-{{ end }}
-</store>
-{{ end }}
-{{ end }}
+  <store>
+    <buffer>
+      @type file
+      path /var/log/fluent/buffer.*
+      total_limit_size 8GB
+      flush_at_shutdown true
+      flush_mode immediate
+      retry_max_interval 5m
+    </buffer>
+  {{- range $key, $value := . }}
+  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
+  {{- end }}
+  </store>
+  {{- end }}
+  {{ else if isJSONObject . }}
+  <store>
+    <buffer>
+      @type file
+      path /var/log/fluent/buffer.*
+      total_limit_size 8GB
+      flush_at_shutdown true
+      flush_mode immediate
+      retry_max_interval 5m
+    </buffer>
+  {{- range $key, $value := . }}
+  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
+  {{- end }}
+  </store>
+{{- end }}
+{{- end }}
 
 # Tail all docker container json logs
 <source>
@@ -105,7 +119,7 @@
 <label @GLOBAL>
   <match docker.*>
     @type copy
-    deep_copy true
+    copy_mode deep
 
     # Default store (in case none specified)
     <store>
@@ -123,17 +137,25 @@
 </label>
 
 # Start service-defined pipelines
-{{ range services }}
-{{ $stack := .Stack }}{{ $service := .Name }}
+{{- range services }}
+{{- $stack := .Stack }}{{ $service := .Name }}
 {{ if not .Parent }}
 <label @{{ $stack }}/{{ $service }}>
-{{ else }}{{ with .Parent }}
+{{- else }}{{- with .Parent }}
 <label @{{ $stack }}/{{ .Name }}/{{ $service }}>
-{{ end }}{{ end }}
-{{ if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
-{{ if $fluentd.service }}{{ $fluentd.service }}{{ end }}
-{{ end }}
+{{- end }}{{- end }}
+{{- if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
+{{- if $fluentd.service }}
+{{ $fluentd.service }}
+{{- else }}
+  <match **>
+    @type null
+  </match>{{ end }}{{- else }}
+  <match **>
+    @type null
+  </match>
+{{- end }}
 </label>
-{{ end }}
+{{- end }}
 
 # End service-defined pipelines
