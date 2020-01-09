@@ -1,5 +1,10 @@
 
-v0.0.9 / 2020-01-07
+1.8.0 / 2020-01-09
+==================
+
+  * Update config for fluentd v1
+
+0.0.9 / 2020-01-07
 ===================
 
   * Fix fluent conf for docker.container fields
