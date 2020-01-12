@@ -8,18 +8,21 @@
 #  => any stack/service in rancher is an available target (though they might not do anything with the messages)
 
 {{- define "store" }}
+{{ $label := printf "%s.%s" .Name .Stack }}
+{{ with .Metadata.GetValue "fluentd" }}
+{{ with .global }}
 {{- if isJSONArray . }}
-{{ range . }}
+{{ range $i, $e := . }}
   <store>
     <buffer>
       @type file
-      path /var/log/fluent/buffer.*
+      path /var/log/fluent/{{ $label }}.*
       total_limit_size 8GB
       flush_at_shutdown true
       flush_mode immediate
       retry_max_interval 5m
     </buffer>
-  {{- range $key, $value := . }}
+  {{- range $key, $value := $e }}
   {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
   {{- end }}
   </store>
@@ -28,7 +31,7 @@
   <store>
     <buffer>
       @type file
-      path /var/log/fluent/buffer.*
+      path /var/log/fluent/{{ $label }}.*
       total_limit_size 8GB
       flush_at_shutdown true
       flush_mode immediate
@@ -38,6 +41,8 @@
   {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
   {{- end }}
   </store>
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -129,7 +134,7 @@
     # Start service-defined global storage
     {{ range services }}{{ if not .Parent }}
     {{ if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
-    {{ if $fluentd.global }}{{ template "store" $fluentd.global }}{{ end }}
+    {{ if $fluentd.global }}{{ template "store" . }}{{ end }}
     {{ end }}{{ end }}{{ end }}
     # End service-defined global storage
 
