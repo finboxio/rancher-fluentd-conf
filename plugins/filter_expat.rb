@@ -58,20 +58,21 @@ module Fluent
     def parse_pattern(pattern, msg, record)
       match = pattern.match(msg)
       if not match.nil? then
+        record['expat'] = {}
         match.names.each do |name|
           begin
             # .json matches will be parsed into metadata assuming json format
             if name.end_with? '.json' then
               entries = parse_json(name[0..-6], match[name])
-              record.merge! entries
+              record['expat'] = entries
             elsif name.end_with? '.num' then
-              record[name[0..-5]] = match[name].to_f
+              record['expat'][name[0..-5]] = match[name].to_f
             else
-              record[name] = match[name]
+              record['expat'][name] = match[name]
             end
           rescue => exception
             puts exception
-            record[name] = match[name]
+            record['expat'][name] = match[name]
           end
         end
       end
@@ -85,14 +86,14 @@ module Fluent
       else
         record[ns] = JSON.parse(string)
       end
-      to_dotted_hash(record)
+      to_flat_hash(record)
     end
 
-    def to_dotted_hash(hash, recursive_key = "")
+    def to_flat_hash(hash, recursive_key = "")
       hash.each_with_object({}) do |(k, v), ret|
         key = recursive_key + k.to_s
         if v.is_a? Hash then
-          ret.merge! to_dotted_hash(v, key + ".")
+          ret.merge! to_flat_hash(v, key + "_")
         else
           ret[key] = v
         end
