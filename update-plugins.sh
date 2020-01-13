@@ -16,7 +16,3 @@ for plugin in $plugins; do
 done
 
 rm /etc/rancher-conf/plugins.txt
-
-# Restart fluentd process
-kill -HUP 1
-

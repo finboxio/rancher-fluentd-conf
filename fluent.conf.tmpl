@@ -19,7 +19,7 @@
       path /var/log/fluent/{{ $label }}.*
       total_limit_size 8GB
       flush_at_shutdown true
-      flush_mode immediate
+      flush_interval 30s
       retry_max_interval 5m
     </buffer>
   {{- range $key, $value := $e }}
