@@ -1,4 +1,11 @@
 
+1.8.3 / 2020-01-12
+==================
+
+  * Make buffer directory a volume
+  * Fix reload script and optimize buffer settings
+  * Clean up reload mechanism
+
 1.8.2 / 2020-01-12
 ==================
 
