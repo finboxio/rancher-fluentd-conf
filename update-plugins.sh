@@ -1,5 +1,10 @@
 #! /bin/sh
 
+while [[ ! -e /etc/rancher-conf/plugins.txt ]]; do
+  echo "waiting for plugin file"
+  sleep 1
+done
+
 plugins=$(cat /etc/rancher-conf/plugins.txt | sort | uniq)
 for plugin in $plugins; do
   if echo $plugin | grep -E 'http[s]?://'; then
@@ -9,3 +14,9 @@ for plugin in $plugins; do
     gem install $plugin
   fi
 done
+
+rm /etc/rancher-conf/plugins.txt
+
+# Restart fluentd process
+kill -HUP 1
+
