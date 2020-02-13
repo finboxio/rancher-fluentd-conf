@@ -42,7 +42,9 @@ module Fluent
 
       unless record[@time_key].nil?
         begin
-          record['actual_unix_timestamp'] = DateTime.parse(record[record[@time_key]]).to_time.utc.to_i
+          parts = record[@time_key].split('.')
+          timestamp = parts.inject(record) { |record, part| record[part] }
+          record['actual_unix_timestamp'] = DateTime.parse(timestamp).to_time.utc.to_i
         rescue => exception
           puts exception
         end
