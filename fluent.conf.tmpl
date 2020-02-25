@@ -111,7 +111,14 @@
 
   <filter docker.*>
     @type kibana
-    hostname {{ host.Name }}
+    {{- with host }}
+    hostname {{ .Name }}
+    group {{ .Labels.GetValue "rancher-group" }}
+    provider aws
+    region {{ .Labels.GetValue "region" }}
+    az {{ .Labels.GetValue "zone" }}
+    machine {{ .Labels.GetValue "instance-type" }}
+    {{- end }}
   </filter>
 
   # Fan out to specified target labels
