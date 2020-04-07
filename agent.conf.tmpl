@@ -7,45 +7,6 @@
 #  => this can be overridden on a per-message basis by using an expression pattern that overrides fluentd.targets
 #  => any stack/service in rancher is an available target (though they might not do anything with the messages)
 
-{{- define "store" }}
-{{ $label := printf "%s.%s" .Name .Stack }}
-{{ with .Metadata.GetValue "fluentd" }}
-{{ with .global }}
-{{- if isJSONArray . }}
-{{ range $i, $e := . }}
-  <store>
-    <buffer>
-      @type file
-      path /var/log/fluent/{{ $label }}.*
-      total_limit_size 8GB
-      flush_at_shutdown true
-      flush_interval 30s
-      retry_max_interval 5m
-    </buffer>
-  {{- range $key, $value := $e }}
-  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
-  {{- end }}
-  </store>
-  {{- end }}
-  {{ else if isJSONObject . }}
-  <store>
-    <buffer>
-      @type file
-      path /var/log/fluent/{{ $label }}.*
-      total_limit_size 8GB
-      flush_at_shutdown true
-      flush_mode immediate
-      retry_max_interval 5m
-    </buffer>
-  {{- range $key, $value := . }}
-  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
-  {{- end }}
-  </store>
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
-
 # Tail all docker container json logs
 <source>
   @type tail
@@ -128,26 +89,6 @@
   </match>
 </label>
 
-<label @GLOBAL>
-  <match docker.*>
-    @type copy
-    copy_mode deep
-
-    # Default store (in case none specified)
-    <store>
-      @type null
-    </store>
-
-    # Start service-defined global storage
-    {{ range services }}{{ if not .Parent }}
-    {{ if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
-    {{ if $fluentd.global }}{{ template "store" . }}{{ end }}
-    {{ end }}{{ end }}{{ end }}
-    # End service-defined global storage
-
-  </match>
-</label>
-
 # Start service-defined pipelines
 {{- range services }}
 {{- $stack := .Stack }}{{ $service := .Name }}
@@ -171,3 +112,27 @@
 {{- end }}
 
 # End service-defined pipelines
+
+<label @GLOBAL>
+{{- with service }}
+{{- with .Parent }}
+{{- $dest := .Labels.GetValue "fluentd.forward" }}
+{{- with service $dest }}
+<match **>
+  @type forward
+  send_timeout 60s
+  recover_wait 10s
+  hard_timeout 60s
+  {{- range .Containers }}
+  <server>
+    name {{ .Name }}
+    host {{ .Address }}
+    port 24224
+    weight 60
+  </server>
+  {{- end }}
+</match>
+{{- end }}
+{{- end }}
+{{- end }}
+</label>

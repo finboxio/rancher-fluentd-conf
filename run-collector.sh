@@ -2,7 +2,7 @@
 
 FLUENTD_DATA_DIR=${FLUENTD_DATA_DIR:-/home/fluent}
 
-while [[ ! -e /etc/rancher-conf/fluent.conf ]]; do
+while [[ ! -e /etc/rancher-conf/collector.conf ]]; do
   echo "waiting for fluentd configuration file"
   sleep 2
 done
@@ -12,6 +12,6 @@ mkdir -p $FLUENTD_DATA_DIR
 /opt/rancher/bin/update-plugins.sh
 
 exec fluentd \
-  -c /etc/rancher-conf/fluent.conf \
+  -c /etc/rancher-conf/collector.conf \
   -p /etc/rancher-conf/plugins \
   $@

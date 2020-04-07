@@ -8,7 +8,13 @@ source = "/etc/rancher-conf/plugins.txt.tmpl"
 dest = "/etc/rancher-conf/plugins.txt"
 
 [[ template ]]
-source = "/etc/rancher-conf/fluent.conf.tmpl"
-dest = "/etc/rancher-conf/fluent.conf"
+source = "/etc/rancher-conf/agent.conf.tmpl"
+dest = "/etc/rancher-conf/agent.conf"
+notify-cmd = "/opt/rancher/bin/reload.sh"
+notify-out = true
+
+[[ template ]]
+source = "/etc/rancher-conf/collector.conf.tmpl"
+dest = "/etc/rancher-conf/collector.conf"
 notify-cmd = "/opt/rancher/bin/reload.sh"
 notify-out = true
