@@ -1,4 +1,9 @@
 
+1.11.0 / 2020-11-14
+==================
+
+  * Multiprocess workers, ECS support, and split processing
+
 1.10.0 / 2020-04-06
 ==================
 
