@@ -29,7 +29,7 @@ module Fluent
 
     def filter(tag, time, record)
       id = interpolate(tag, @container_id)
-      config = get_cfg(id)
+      config = get_cached_cfg(id)
 
       record['log'] = sanitize(record['log'])
       record['docker.container.id'] = id
@@ -57,9 +57,10 @@ module Fluent
       str.gsub(/\$\{tag_parts\[(\d+)\]\}/) { |m| tag_parts[$1.to_i] }
     end
 
-    def get_name(id)
+    def get_cached_cfg(id)
+      @id_to_cfg.clear if @id_to_cfg.length > 100
       @id_to_cfg[id] = get_cfg(id) unless @id_to_cfg.has_key? id
-      @id_to_cfg[id]['Name']
+      @id_to_cfg[id]
     end
 
     def sanitize(string)

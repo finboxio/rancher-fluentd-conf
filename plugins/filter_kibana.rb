@@ -12,15 +12,17 @@ module Fluent::Plugin
     config_param :machine, :string, default: ''
 
     def filter(tag, time, record)
-      record['@timestamp'] = Time.at(time.to_r).utc.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
       record['host.name'] = @hostname
       record['host.group'] = @group
       record['cloud.provider'] = @provider
       record['cloud.region'] = @region
       record['cloud.availability_zone'] = @az
       record['cloud.machine.type'] = @machine
+
+      record['@timestamp'] = Time.at(time.to_r).utc.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
       record['message'] = record['log']
       record.delete('log')
+
       record
     end
   end

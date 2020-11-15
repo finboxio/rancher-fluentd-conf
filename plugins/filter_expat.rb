@@ -44,7 +44,13 @@ module Fluent
         begin
           parts = record[@time_key].split('.')
           timestamp = parts.inject(record) { |record, part| record[part] }
-          record['actual_unix_timestamp'] = DateTime.parse(timestamp).to_time.utc.to_i
+          dt = DateTime.parse(timestamp).to_time.utc
+
+          # update actual record time
+          record['actual_unix_timestamp'] = dt.to_i
+
+          # update timestamp for kibana
+          record['@timestamp'] = dt.strftime('%Y-%m-%dT%H:%M:%S.%LZ')
         rescue => exception
           puts exception
         end
@@ -63,10 +69,24 @@ module Fluent
         record['expat'] = {}
         match.names.each do |name|
           begin
+            if name == 'ecs.message' then
+              record['log.original'] = record['message']
+              record['message'] = match['ecs.message']
+            elsif name.start_with? 'ecs.' then
+              record[name[4..-1]] = match[name]
             # .json matches will be parsed into metadata assuming json format
-            if name.end_with? '.json' then
-              entries = parse_json(name[0..-6], match[name])
-              record['expat'] = entries
+            elsif name.end_with? '.json' then
+              entries = JSON.parse(match[name])
+              entries.delete_if do | field, value |
+                if field.start_with? 'ecs.' then
+                  # TODO: do we need to coerce these values?
+                  record[field[4..-1]] = value
+                  return true
+                end
+              end
+
+              field = name[0..-6]
+              record['expat'].merge!(to_flat_hash({ field => entries }))
             elsif name.end_with? '.num' then
               record['expat'][name[0..-5]] = match[name].to_f
             else
@@ -81,14 +101,8 @@ module Fluent
       record
     end
 
-    def parse_json(ns, string)
-      record = {}
-      if ns == "_" then
-        record = JSON.parse(string)
-      else
-        record[ns] = JSON.parse(string)
-      end
-      to_flat_hash(record)
+    def parse_json(string)
+      JSON.parse(string)
     end
 
     def to_flat_hash(hash, recursive_key = "")

@@ -1,16 +1,17 @@
 {{- define "store" }}
-{{ $label := printf "%s.%s" .Name .Stack }}
+{{ $label := printf "%s.%s" .Name .Stack.Name }}
 {{ with .Metadata.GetValue "fluentd" }}
 {{ with .global }}
 {{- if isJSONArray . }}
 {{ range $i, $e := . }}
   <store>
+    @id {{ $label }}
     <buffer>
       @type file
-      path /var/log/fluent/{{ $label }}.*
-      total_limit_size 8GB
+      total_limit_size "#{((ENV['BUFFER_MAX_MB'] || '8192').to_i / {{ cpus }}).to_s + 'MB'}"
       flush_at_shutdown true
-      flush_interval 30s
+      flush_interval "#{ENV['BUFFER_FLUSH_INTERVAL'] || '30s'}"
+      flush_thread_count "#{ENV['BUFFER_FLUSH_THREAD_COUNT'] || {{ cpus }}}"
       retry_max_interval 5m
     </buffer>
   {{- range $key, $value := $e }}
@@ -20,12 +21,13 @@
   {{- end }}
   {{ else if isJSONObject . }}
   <store>
+    @id {{ $label }}
     <buffer>
       @type file
-      path /var/log/fluent/{{ $label }}.*
-      total_limit_size 8GB
+      total_limit_size "#{((ENV['BUFFER_MAX_MB'] || '8192').to_i / {{ cpus }}).to_s + 'MB'}"
       flush_at_shutdown true
       flush_mode immediate
+      flush_thread_count "#{ENV['BUFFER_FLUSH_THREAD_COUNT'] || {{ cpus }}}"
       retry_max_interval 5m
     </buffer>
   {{- range $key, $value := . }}
@@ -37,18 +39,74 @@
 {{- end }}
 {{- end }}
 
+<system>
+  workers {{ cpus }}
+  root_dir /var/log/fluent/
+</system>
+
 <source>
+  @id incoming
   @type forward
   port 24224
   bind 0.0.0.0
 </source>
 
-<match docker.*>
+# extract fields from fluentd.pattern
+<filter docker.**>
+  @type expat
+  log_key message
+</filter>
+
+# update record timestamp
+<filter docker.**>
+  @type record_transformer
+  renew_time_key actual_unix_timestamp
+</filter>
+
+# TODO: Re-work this to support multi-process workers.
+#       Possibly could rewrite tag in plugin using targets_key
+#       (e.g. docker.<name>.target:stack1/service1.target:stack2/service2...end)
+#       <match **.target:stack1/service1**>
+#         @type null
+#       </match>
+#
+# Fan out to specified target labels
+# <match docker.**>
+#   @type fanout
+#   targets_key docker.container.labels.fluentd.targets
+# </match>
+#
+# Start service-defined pipelines
+# {{- range services }}
+# {{- $stack := .Stack.Name }}{{ $service := .Name }}
+# {{ if not .Parent }}
+# <label @{{ $stack }}/{{ $service }}>
+# {{- else }}{{- with .Parent }}
+# <label @{{ $stack }}/{{ .Name }}/{{ $service }}>
+# {{- end }}{{- end }}
+# {{- if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
+# {{- if $fluentd.service }}
+# {{ $fluentd.service }}
+# {{- else }}
+#   <match **>
+#     @type null
+#   </match>{{ end }}{{- else }}
+#   <match **>
+#     @type null
+#   </match>
+# {{- end }}
+# </label>
+# {{ end }}
+# End service-defined pipelines
+
+<match docker.**>
+  @id docker
   @type copy
   copy_mode deep
 
   # Default store (in case none specified)
   <store>
+    @id nowhere
     @type null
   </store>
 
@@ -58,5 +116,4 @@
   {{ if $fluentd.global }}{{ template "store" . }}{{ end }}
   {{ end }}{{ end }}{{ end }}
   # End service-defined global storage
-
 </match>

@@ -28,10 +28,10 @@
 </filter>
 
 # Rewrite tag to docker.<container_name> for readability
-<match docker.var.lib.docker.containers.**>
-  @type rewrite_tag
-  rewriterule1 docker.container.name (.+) docker.$1
-</match>
+# <match docker.var.lib.docker.containers.**>
+#  @type rewrite_tag
+#  rewriterule1 docker.container.name (.+) docker.$1
+# </match>
 
 # Concat multiline messages
 # (any line that starts with whitespace
@@ -40,7 +40,7 @@
 # TODO: allow specification of multiline
 #       pattern in fluentd.multiline label
 
-<filter docker.*>
+<filter docker.**>
   @type concat
   @log_level warn
   key log
@@ -54,23 +54,14 @@
 
 # Relabel so that concat successes and
 # timeouts end up in the same pipeline
-<match docker.*>
+<match docker.**>
   @type relabel
   @label @DEFAULT
 </match>
 
 <label @DEFAULT>
-  # extract fields from fluentd.pattern
-  <filter docker.*>
-    @type expat
-  </filter>
-
-  <filter docker.*>
-    @type record_transformer
-    renew_time_key actual_unix_timestamp
-  </filter>
-
-  <filter docker.*>
+  # Attach host info in kibana-readable format
+  <filter docker.**>
     @type kibana
     {{- with host }}
     hostname {{ .Name }}
@@ -82,57 +73,26 @@
     {{- end }}
   </filter>
 
-  # Fan out to specified target labels
-  <match docker.*>
-    @type fanout
-    targets_key docker.container.labels.fluentd.targets
-  </match>
-</label>
-
-# Start service-defined pipelines
-{{- range services }}
-{{- $stack := .Stack }}{{ $service := .Name }}
-{{ if not .Parent }}
-<label @{{ $stack }}/{{ $service }}>
-{{- else }}{{- with .Parent }}
-<label @{{ $stack }}/{{ .Name }}/{{ $service }}>
-{{- end }}{{- end }}
-{{- if .Metadata.GetValue "fluentd" }}{{ $fluentd := .Metadata.GetValue "fluentd" }}
-{{- if $fluentd.service }}
-{{ $fluentd.service }}
-{{- else }}
+  {{- with service }}
+  {{- with .Parent }}
+  {{- $dest := .Labels.GetValue "fluentd.forward" }}
+  {{- with service $dest }}
   <match **>
-    @type null
-  </match>{{ end }}{{- else }}
-  <match **>
-    @type null
+    @type forward
+    send_timeout 60s
+    recover_wait 10s
+    hard_timeout 60s
+    {{- range .Containers }}
+    <server>
+      name {{ .Name }}
+      host {{ .PrimaryIp }}
+      port 24224
+      weight 60
+    </server>
+    {{- end }}
   </match>
-{{- end }}
-</label>
-{{- end }}
-
-# End service-defined pipelines
-
-<label @GLOBAL>
-{{- with service }}
-{{- with .Parent }}
-{{- $dest := .Labels.GetValue "fluentd.forward" }}
-{{- with service $dest }}
-<match **>
-  @type forward
-  send_timeout 60s
-  recover_wait 10s
-  hard_timeout 60s
-  {{- range .Containers }}
-  <server>
-    name {{ .Name }}
-    host {{ .Address }}
-    port 24224
-    weight 60
-  </server>
   {{- end }}
-</match>
-{{- end }}
-{{- end }}
-{{- end }}
+  {{- end }}
+  {{- end }}
 </label>
+
