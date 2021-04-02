@@ -15,4 +15,5 @@ for plugin in $plugins; do
   fi
 done
 
-rm /etc/rancher-conf/plugins.txt
+mv /etc/rancher-conf/plugins.txt /etc/rancher-conf/plugins.installed.txt
+touch /etc/rancher-conf/plugins.txt

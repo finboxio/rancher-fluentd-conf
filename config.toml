@@ -6,6 +6,7 @@ onetime = false
 [[ template ]]
 source = "/etc/rancher-conf/plugins.txt.tmpl"
 dest = "/etc/rancher-conf/plugins.txt"
+check-cmd = "! cmp {{staging}} plugins.installed.txt"
 
 [[ template ]]
 source = "/etc/rancher-conf/agent.conf.tmpl"
