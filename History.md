@@ -1,4 +1,10 @@
 
+1.11.1 / 2021-04-02
+==================
+
+  * Fix deadlock issue preventing config update
+  * Create LICENSE
+
 1.11.0 / 2020-11-14
 ==================
 
