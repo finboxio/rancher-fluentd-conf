@@ -1,4 +1,9 @@
 
+1.11.2 / 2021-04-14
+==================
+
+  * Update rancher-conf-aws base image (fix null host issue)
+
 1.11.1 / 2021-04-02
 ==================
 
