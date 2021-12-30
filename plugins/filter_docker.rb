@@ -32,8 +32,11 @@ module Fluent
       config = get_cached_cfg(id)
 
       record['log'] = sanitize(record['log'])
-      record['docker.container.id'] = id
-      record['docker.container.name'] = config['Name'] || '<unknown>'
+      record['container.runtime'] = 'docker'
+      record['docker.container.id'] = record['container.id'] = id
+      record['docker.container.name'] = record['container.name'] = config['Name'] || '<unknown>'
+      record['docker.container.image.name'] = record['container.image.name'] = config['_Image'] || '<unknown>'
+      record['docker.container.image.tag'] = record['container.image.tag'] = config['_Tag'] || '<unknown>'
 
       unless config['Config']['Labels'].nil?
         config['Config']['Labels'].each_pair do |k,v|
@@ -72,6 +75,8 @@ module Fluent
         config_path = "#{@docker_containers_path}/#{id}/config.v2.json"
         docker_cfg = JSON.parse(File.read(config_path))
         docker_cfg['Name'] = docker_cfg['Name'][1..-1]
+        docker_cfg['_Image'] = docker_cfg['Config']['Image'].split(':')[0]
+        docker_cfg['_Tag'] = docker_cfg['Config']['Image'].split(':')[1] || 'latest'
       rescue => exception
         puts exception
         docker_cfg = {}
