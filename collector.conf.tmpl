@@ -13,9 +13,14 @@
       flush_interval "#{ENV['BUFFER_FLUSH_INTERVAL'] || '30s'}"
       flush_thread_count "#{ENV['BUFFER_FLUSH_THREAD_COUNT'] || {{ cpus }}}"
       retry_max_interval 5m
+      {{- with .buffer }}
+      {{- range $key, $value := . }}
+      {{ $key }} {{ $value }}
+      {{- end }}
+      {{- end }}
     </buffer>
   {{- range $key, $value := $e }}
-  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
+  {{ if eq $key "type" }}  @type {{ $value }}{{ else if ne $key "buffer" }}  {{ $key }} {{ $value }}{{ end }}
   {{- end }}
   </store>
   {{- end }}
@@ -29,9 +34,14 @@
       flush_mode immediate
       flush_thread_count "#{ENV['BUFFER_FLUSH_THREAD_COUNT'] || {{ cpus }}}"
       retry_max_interval 5m
+      {{- with .buffer }}
+      {{- range $key, $value := . }}
+      {{ $key }} {{ $value }}
+      {{- end }}
+      {{- end }}
     </buffer>
   {{- range $key, $value := . }}
-  {{ if eq $key "type" }}  @type {{ $value }}{{ else }}  {{ $key }} {{ $value }}{{ end }}
+  {{ if eq $key "type" }}  @type {{ $value }}{{ else if ne $key "buffer" }}  {{ $key }} {{ $value }}{{ end }}
   {{- end }}
   </store>
 {{- end }}
