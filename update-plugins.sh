@@ -5,15 +5,15 @@ while [[ ! -e /etc/rancher-conf/plugins.txt ]]; do
   sleep 1
 done
 
-plugins=$(cat /etc/rancher-conf/plugins.txt | sort | uniq)
-for plugin in $plugins; do
+plugins=$(cat /etc/rancher-conf/plugins.txt | uniq)
+while read plugin; do
   if echo $plugin | grep -E 'http[s]?://'; then
     fname=$(echo ${plugin##*/} | cut -d# -f1 | cut -d? -f1)
     wget -O /etc/rancher-conf/plugins/$fname $plugin
   else
     gem install $plugin
   fi
-done
+done </etc/rancher-conf/plugins.txt
 
 mv /etc/rancher-conf/plugins.txt /etc/rancher-conf/plugins.installed.txt
 touch /etc/rancher-conf/plugins.txt
