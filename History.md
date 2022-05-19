@@ -1,4 +1,9 @@
 
+1.11.9 / 2022-05-19
+==================
+
+  * ignore fluentd forward containers on inactive hosts
+
 1.11.8 / 2022-02-10
 ==================
 
