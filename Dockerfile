@@ -1,4 +1,4 @@
-FROM finboxio/rancher-conf-aws:v1.3.5
+FROM finboxio/rancher-conf-aws:v1.3.6
 
 RUN apk add --no-cache docker
 
