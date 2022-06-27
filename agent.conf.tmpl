@@ -83,6 +83,7 @@
     recover_wait 10s
     hard_timeout 60s
     {{- range .Containers }}
+    {{ if .Host }}
     {{- if (eq .Host.State "active") }}
     <server>
       name {{ .Name }}
@@ -90,6 +91,7 @@
       port 24224
       weight 60
     </server>
+    {{- end }}
     {{- end }}
     {{- end }}
   </match>
